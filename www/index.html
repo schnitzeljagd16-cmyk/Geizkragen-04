@@ -150,6 +150,12 @@ h2{font-family:var(--display);font-weight:800;font-size:22px;margin:0;text-wrap:
 .bchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .bchip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 11px;font-size:13.5px;font-weight:600}
 .bchip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.scanbtn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--accent-ink);border-radius:12px;padding:12px;font-weight:700;cursor:pointer}
+.scanres{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.scanres .hint{font-size:13px;color:var(--muted)}
+.scanres .found{font-weight:700;font-size:16px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
 nav.tabs .wrap{display:grid;grid-template-columns:repeat(3,1fr);padding-block:6px}
 nav.tabs button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:600;color:var(--muted);padding:6px 0;position:relative}
@@ -202,6 +208,9 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
     <section class="view" id="v-favs" hidden>
       <h2>Deine Favoriten</h2>
       <p class="lead">Tipp ein Produkt oder eine Marke ein und wähl einen Vorschlag, oder such dir Marken aus der Liste aus. Ein roter Punkt heißt: gerade im Angebot.</p>
+      <label class="scanbtn" for="photoIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Produkt fotografieren</label>
+      <input type="file" id="photoIn" accept="image/*" capture="environment" hidden>
+      <div class="scanres" id="scanRes" hidden></div>
       <form class="addrow" id="favForm"><input id="favInput" placeholder="Produkt oder Marke, z. B. Kaffee, Coca-Cola" autocomplete="off" autocapitalize="sentences" enterkeyhint="done"><button class="btn primary" type="submit">Merken</button></form>
       <div class="sugg" id="favSugg" hidden></div>
       <details class="brandcat" id="brandCat"><summary>Alle Marken durchstöbern</summary>
@@ -286,6 +295,7 @@ const BRANDS={
  "Snacks":["Chio","Funny-frisch","Lorenz","Pringles","Doritos","Lay's","Crunchips","Ültje","XOX","Wurzener"],
  "Kühlregal":["Müller","Ehrmann","Danone","Activia","Actimel","Zott","Bauer","Weihenstephan","Landliebe","Bärenmarke","Philadelphia","Exquisa","Almette","Bresso","Leerdammer","Babybel","Kerrygold","Arla","Rama","Lätta","Becel","Rügenwalder Mühle","Herta","Wiesenhof","Gutfried","Meica","Böklunder","Tillman's"],
  "Tiefkühl":["Dr. Oetker","Wagner","Iglo","Frosta","McCain","Ben & Jerry's","Langnese","Magnum","Mövenpick"],
+ "Frühstück & Cerealien":["Lion","Nestlé","Nesquik","Cini Minis","Cheerios","Kellogg's","Choco Krispies","Smacks","Froot Loops","Kölln","Seitenbacher","Dr. Oetker Vitalis","Nutella","Nutoka","Zentis","Schwartau","Mövenpick Konfitüre"],
  "Vorrat & Brot":["Barilla","Knorr","Maggi","Miracoli","Mondamin","Ben's Original","Kühne","Heinz","Hellmann's","Thomy","Develey","Bonduelle","Erasco","Kellogg's","Kölln","Seitenbacher","Nestlé","Golden Toast","Harry","Lieken Urkorn","Mestemacher"],
  "Drogerie & Haushalt":["Persil","Ariel","Weißer Riese","Lenor","Frosch","Fairy","Pril","Finish","Somat","Calgon","WC Ente","WC Frisch","Domestos","Meister Proper","Sagrotan","Tempo","Zewa","Hakle","Cottonelle","Nivea","Dove","Duschdas","Fa","Axe","Rexona","Gillette","Colgate","Elmex","Odol-med3","Oral-B","Schauma","Head & Shoulders","Garnier","Labello","Pampers","Balea","Isana"],
  "Tier":["Whiskas","Felix","Sheba","Gourmet","Pedigree","Chappi","Frolic"]
@@ -570,6 +580,49 @@ document.addEventListener("click",e=>{
     if(isFavName(v)){S.favs=S.favs.filter(f=>norm(f)!==norm(v));toast("Favorit entfernt")}else{S.favs=[...S.favs,v];toast("„"+v+"“ gemerkt")}
     save();render()}
 });
+
+/* ---------- Produktfoto erkennen ---------- */
+let zxingP=null;
+function loadZXing(){if(window.ZXing)return Promise.resolve();if(zxingP)return zxingP;
+  zxingP=new Promise((res,rej)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";sc.onload=res;sc.onerror=rej;document.head.appendChild(sc)});return zxingP}
+async function shrink(file,max=1400){
+  try{const bmp=await createImageBitmap(file);const k=Math.min(1,max/Math.max(bmp.width,bmp.height));
+    const c=document.createElement("canvas");c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
+    return await new Promise(r=>c.toBlob(b=>r(b||file),"image/jpeg",0.85));}catch(e){return file}
+}
+async function readBarcode(blob){
+  try{if("BarcodeDetector" in window){const bd=new BarcodeDetector({formats:["ean_13","ean_8","upc_a","upc_e"]});const r=await bd.detect(await createImageBitmap(blob));if(r&&r[0])return r[0].rawValue}}catch(e){}
+  try{await loadZXing();const url=URL.createObjectURL(blob);const res=await new ZXing.BrowserMultiFormatReader().decodeFromImageUrl(url);URL.revokeObjectURL(url);return res.getText()}catch(e){}
+  return null;
+}
+async function lookupBarcode(code){
+  try{const r=await fetch("https://world.openfoodfacts.org/api/v2/product/"+encodeURIComponent(code)+".json?fields=product_name,product_name_de,brands,generic_name_de");
+    const d=await r.json();if(d.status!==1||!d.product)return null;const pr=d.product;
+    return{brands:(pr.brands||"").split(",").map(x=>x.trim()).filter(Boolean),name:pr.product_name_de||pr.product_name||"",kind:pr.generic_name_de||""};}catch(e){return null}
+}
+async function askClaude(blob){
+  try{const sample=await window.claude?.use?.("sample");if(!sample)return null;
+    const lim=await sample.limits().catch(()=>null);if(!lim||!lim.images)return null;
+    const d=await sample.json("Auf dem Foto ist ein Produkt aus dem Supermarkt, Getränkemarkt oder der Drogerie. Erkenne es. Antworte nur mit JSON in dieser Form: {\"marke\":\"Produktmarke wie auf der Packung, z. B. Lion\",\"hersteller\":\"Herstellermarke falls anders, z. B. Nestlé, sonst null\",\"produkt\":\"kurzer deutscher Produktname, z. B. Lion Cerealien Karamell und Schokolade\",\"art\":\"Produktart auf Deutsch, z. B. Cerealien\"}. Wenn kein Produkt erkennbar ist: {\"marke\":null}.",{images:[blob],modelTier:"quick"});
+    if(!d||!d.marke)return{none:true};
+    return{brands:[d.marke,d.hersteller].filter(Boolean),name:d.produkt||"",kind:d.art||""};}catch(e){return null}
+}
+function showScan(html){const el=$("#scanRes");el.innerHTML=html;el.hidden=false}
+async function scanPhoto(file){
+  showScan(`<div class="hint"><span class="spin"></span>Produkt wird erkannt …</div>`);
+  const blob=await shrink(file);
+  let info=null, code=await readBarcode(blob);
+  if(code)info=await lookupBarcode(code);
+  if(!info)info=await askClaude(blob);
+  if(!info||info.none){
+    showScan(`<div class="found">Nicht erkannt</div><div class="hint">${code?"Strichcode "+esc(code)+" gefunden, aber das Produkt ist nicht in der Datenbank.":"Fotografiere am besten den <b>Strichcode</b> auf der Rückseite, scharf und gut beleuchtet."} Du kannst den Namen auch unten eintippen.</div>`);return}
+  const names=[...new Set([...info.brands.map(b=>b.replace(/\s*\(.*\)$/,"")),info.name].filter(Boolean))].slice(0,4);
+  const sale=names.some(n=>onSaleNow(n));
+  showScan(`<div class="hint">Erkannt${code?" über den Strichcode":""}:</div><div class="found">${esc(info.name||names[0])}</div>
+    <div class="hint">${sale?'<b style="color:var(--accent)">Gerade im Angebot!</b> ':""}Was möchtest du merken?</div>
+    <div class="sugg">${names.map(n=>`<button type="button" class="sg${onSaleNow(n)?" sale":""}" data-addfav="${esc(n)}">★ ${esc(n)}</button>`).join("")}</div>`);
+}
+$("#photoIn").addEventListener("change",e=>{const f=e.target.files&&e.target.files[0];if(f)scanPhoto(f);e.target.value=""});
 /* ---------- Start ---------- */
 const DATA_URL="https://raw.githubusercontent.com/schnitzeljagd16-cmyk/geizkragen-04/main/data/week.json";
 function applyWeek(d){if(!d||!Array.isArray(d.offers))return false;OFFERS=d.offers;META={from:d.from,to:d.to,updated:d.updated};render();return true}
