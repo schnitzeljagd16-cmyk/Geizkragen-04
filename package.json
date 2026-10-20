@@ -1,0 +1,17 @@
+{
+  "name": "geizkragen-04",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Geizkragen 04 – Angebote in Leverkusen mit Favoriten und Einkaufszettel",
+  "scripts": {
+    "android:build": "npx cap add android && npx capacitor-assets generate --android && npx cap sync android && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "6.1.2",
+    "@capacitor/core": "6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "3.0.5",
+    "@capacitor/cli": "6.1.2"
+  }
+}

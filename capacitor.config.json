@@ -1,0 +1,9 @@
+{
+  "appId": "de.geizkragen04.app",
+  "appName": "Geizkragen 04",
+  "webDir": "www",
+  "backgroundColor": "#151012",
+  "android": {
+    "allowMixedContent": false
+  }
+}

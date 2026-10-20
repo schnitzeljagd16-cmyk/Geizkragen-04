@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#151012">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Geizkragen 04</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: Handy-App — klebender Kopf, Inhaltsliste, Tab-Leiste unten. Werkself-Rot & Schwarz, Kassenbon-Details. */
+:root{
+  --bg:#f6f1f0; --surface:#ffffff; --surface2:#efe7e6; --fg:#1b1415; --muted:#6f6264; --line:#e2d7d6;
+  --accent:#d6111b; --accent-ink:#ffffff; --ink:#151012; --good:#1f7a43; --warn:#b35c00;
+  --display:"Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#131011; --surface:#1e191a; --surface2:#2a2324; --fg:#f3eded; --muted:#a99c9d; --line:#3a3132;
+  --accent:#ff3b44; --accent-ink:#1a0506; --ink:#0b0809; --good:#4cc47e; --warn:#f0a040; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131011; --surface:#1e191a; --surface2:#2a2324; --fg:#f3eded; --muted:#a99c9d; --line:#3a3132;
+  --accent:#ff3b44; --accent-ink:#1a0506; --ink:#0b0809; --good:#4cc47e; --warn:#f0a040; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--ink)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ink);color:#fff}
+header.top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px}
+.logo{width:42px;height:42px;flex:none}
+.brand{flex:1;min-width:0}
+.brand h1{font-family:var(--display);font-weight:800;font-size:22px;line-height:1;margin:0;letter-spacing:-.01em}
+.brand h1 span{color:#ff3b44}
+.brand p{margin:3px 0 0;font-size:12px;color:#c9bcbd}
+.chip-st{border:1px solid #4a3d3f;background:#251d1f;color:#fff;border-radius:999px;padding:6px 11px;font-size:13px;font-weight:600;white-space:nowrap}
+.chip-st b{color:#ff6a70;font-weight:700}
+
+main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+.view{display:flex;flex-direction:column;gap:14px;padding-block:14px}
+.week{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.week strong{color:var(--fg);font-weight:700}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 12px}
+.search input{flex:1;min-width:0;border:0;background:transparent;color:var(--fg);font:inherit;padding:11px 0;outline:none}
+.scroller{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-inline:-4px;padding:2px 4px}
+.scroller::-webkit-scrollbar{display:none}
+.pill{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--fg)}
+.pill[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.pill small{opacity:.6;font-weight:500;margin-left:3px}
+.sortrow{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.sortrow select{background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:5px 8px;font:inherit;font-size:13px}
+
+.list{display:flex;flex-direction:column;gap:10px}
+.offer{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;grid-template-columns:1fr auto;gap:4px 12px}
+.offer.fav{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.o-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.mk{background:var(--surface2);color:var(--fg);border-radius:5px;padding:2px 6px}
+.favtag{color:var(--accent)}
+.o-name{font-weight:600;font-size:15px;line-height:1.3;min-width:0;overflow-wrap:anywhere}
+.o-brand{font-size:12px;color:var(--muted);font-weight:600}
+.o-sub{font-size:12.5px;color:var(--muted)}
+.o-price{grid-column:2;grid-row:1 / span 3;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.price{font-family:var(--display);font-weight:800;font-size:24px;line-height:1;font-variant-numeric:tabular-nums}
+.old{font-size:12.5px;color:var(--muted);text-decoration:line-through;font-variant-numeric:tabular-nums}
+.disc{background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:12px;border-radius:6px;padding:2px 6px}
+.o-actions{grid-column:1 / -1;display:flex;gap:8px;margin-top:6px}
+.btn{border:1px solid var(--line);background:transparent;border-radius:9px;padding:7px 11px;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.btn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn svg{width:15px;height:15px}
+
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:22px 16px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--fg);font-family:var(--display);font-size:18px;margin-bottom:4px}
+.note{font-size:12.5px;color:var(--muted);line-height:1.5}
+.note b{color:var(--fg)}
+h2{font-family:var(--display);font-weight:800;font-size:22px;margin:0;text-wrap:balance}
+.lead{margin:-6px 0 0;color:var(--muted);font-size:14px}
+
+.addrow{display:flex;gap:8px}
+.addrow input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;color:var(--fg)}
+.favchips{display:flex;flex-wrap:wrap;gap:8px}
+.favchip{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 6px 5px 12px;font-weight:600;font-size:14px}
+.favchip .cnt{background:var(--accent);color:var(--accent-ink);border-radius:999px;font-size:11px;padding:1px 7px}
+.favchip .cnt.zero{background:var(--surface2);color:var(--muted)}
+.favchip button{border:0;background:var(--surface2);border-radius:999px;width:22px;height:22px;line-height:1;font-size:14px}
+
+/* Einkaufszettel wie ein Kassenbon */
+.receipt{background:var(--surface);border-radius:4px;padding:16px 14px 20px;position:relative;box-shadow:0 1px 0 var(--line)}
+.receipt::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:8px;background:linear-gradient(-45deg,transparent 6px,var(--surface) 0) 0 0/12px 8px repeat-x,linear-gradient(45deg,transparent 6px,var(--surface) 0) 0 0/12px 8px repeat-x}
+.rhead{text-align:center;font-family:var(--display);font-weight:800;font-size:17px;letter-spacing:.06em;text-transform:uppercase}
+.rsub{text-align:center;font-size:12px;color:var(--muted);margin-bottom:10px}
+.rgroup{border-top:1px dashed var(--line);padding-top:8px;margin-top:8px}
+.rgroup h3{margin:0 0 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ritem{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;padding:6px 0}
+.ritem input{width:20px;height:20px;accent-color:var(--accent)}
+.ritem .nm{min-width:0;overflow-wrap:anywhere}
+.ritem.done .nm{text-decoration:line-through;color:var(--muted)}
+.ritem .pr{font-variant-numeric:tabular-nums;font-weight:600}
+.ritem .x{border:0;background:transparent;color:var(--muted);font-size:18px;padding:0 4px}
+.rtotal{display:flex;justify-content:space-between;border-top:2px solid var(--fg);margin-top:10px;padding-top:8px;font-family:var(--display);font-weight:800;font-size:18px;font-variant-numeric:tabular-nums}
+
+.favsum{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.favsum b{color:var(--accent);font-family:var(--display);font-size:16px}
+.favtable{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.frow{display:grid;grid-template-columns:1fr auto;border-top:1px solid var(--line)}
+.frow:first-child{border-top:0}
+.fmain{border:0;background:transparent;text-align:left;padding:12px 4px 12px 14px;display:grid;grid-template-columns:1fr auto;gap:3px 10px;align-items:center;min-width:0}
+.fmain:disabled{cursor:default;opacity:1;color:inherit}
+.fname{font-weight:700;font-size:15.5px;grid-column:1;overflow-wrap:anywhere}
+.st{grid-column:2;grid-row:1;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:3px 8px;white-space:nowrap}
+.st.yes{background:var(--accent);color:var(--accent-ink)}
+.st.no{background:var(--surface2);color:var(--muted)}
+.where{grid-column:1;font-size:13px;color:var(--muted);min-width:0}
+.where b{color:var(--fg);font-variant-numeric:tabular-nums}
+.chev{grid-column:2;grid-row:2;font-size:12px;color:var(--muted);text-align:right;font-weight:600}
+.frow.hit{box-shadow:inset 4px 0 0 var(--accent)}
+.fdel{border:0;background:transparent;color:var(--muted);font-size:20px;width:44px}
+.fhits{grid-column:1 / -1;padding:0 10px 12px;background:var(--surface2);padding-top:10px}
+.offer{cursor:pointer}
+.morelink{color:var(--accent);font-weight:700}
+.dhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.dhead h2{font-size:20px}
+.dclose{border:0;background:var(--surface2);border-radius:999px;width:34px;height:34px;font-size:18px;flex:none}
+.chain{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.chain.cur{border-color:var(--accent)}
+.chain-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:10px 12px;background:var(--surface2)}
+.chain-h b{font-family:var(--display);font-size:16px}
+.chain-h .pp{font-family:var(--display);font-weight:800;font-size:18px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chain-h small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.store{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:10px 12px;border-top:1px solid var(--line)}
+.store .sa{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.store .sz{font-size:12.5px;color:var(--muted)}
+.store .near{color:var(--accent);font-weight:700}
+.store a{grid-column:2;grid-row:1 / span 2;color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
+.store a:focus-visible{outline:2px solid var(--accent)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav.tabs .wrap{display:grid;grid-template-columns:repeat(3,1fr);padding-block:6px}
+nav.tabs button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:600;color:var(--muted);padding:6px 0;position:relative}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button[aria-current="page"]{color:var(--accent)}
+.badge{position:absolute;top:2px;left:calc(50% + 6px);background:var(--accent);color:var(--accent-ink);font-size:10px;font-weight:800;border-radius:999px;padding:0 5px;min-width:16px;text-align:center}
+
+/* Start-Dialog */
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(10,6,7,.55);display:flex;align-items:flex-end;justify-content:center}
+.sheet .panel{background:var(--bg);width:100%;max-width:640px;max-height:92%;overflow:auto;border-radius:18px 18px 0 0;padding:20px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.opt{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;text-align:left;font-weight:600}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;z-index:30}
+@media (prefers-reduced-motion:no-preference){.offer{transition:border-color .2s}}
+</style>
+</head>
+<body>
+
+
+<header class="top">
+  <div class="wrap">
+    <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><clipPath id="pig"><path d="M10 34c0-12 10-20 24-20 9 0 16 3 20 9l5-2-1 7c2 2 3 5 3 8v4l-4 1c-2 5-6 8-11 10v6h-7v-4h-10v4h-7v-7c-6-3-10-9-10-16z"/></clipPath></defs>
+      <g clip-path="url(#pig)">
+        <rect width="64" height="64" fill="#d6111b"/>
+        <rect x="18" width="7" height="64" fill="#111"/><rect x="32" width="7" height="64" fill="#111"/><rect x="46" width="7" height="64" fill="#111"/>
+      </g>
+      <rect x="28" y="16" width="12" height="3" rx="1.5" fill="#fff"/>
+      <circle cx="49" cy="29" r="2" fill="#fff"/>
+      <text x="32" y="45" text-anchor="middle" font-family="Arial Black,Arial" font-weight="900" font-size="13" fill="#fff">04</text>
+    </svg>
+    <div class="brand">
+      <h1>Geizkragen <span>04</span></h1>
+      <p>Angebote in Leverkusen</p>
+    </div>
+    <button class="chip-st" id="stBtn" type="button">📍 <b id="stName">Stadtteil</b></button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <!-- ANGEBOTE -->
+    <section class="view" id="v-offers">
+      <div class="week"><span>Prospektwoche <strong id="weekRange">–</strong></span><span id="weekUpd"></span></div>
+      <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Suchen: Produkt oder Marke …" autocomplete="off"></label>
+      <div class="scroller" id="cats" role="group" aria-label="Kategorien"></div>
+      <div class="scroller" id="mkts" role="group" aria-label="Märkte"></div>
+      <div class="sortrow"><span id="count">0 Angebote</span><span style="flex:1"></span>
+        <label for="sort">Sortieren</label>
+        <select id="sort"><option value="disc">Größte Ersparnis</option><option value="price">Preis</option><option value="unit">Grundpreis</option><option value="market">Markt</option></select></div>
+      <div class="list" id="offerList"></div>
+      <p class="note" id="missing"></p>
+    </section>
+
+    <!-- FAVORITEN -->
+    <section class="view" id="v-favs" hidden>
+      <h2>Deine Favoriten</h2>
+      <p class="lead">Trag ein, was du regelmäßig kaufst. Hier steht bei jedem Produkt, ob und wo es diese Woche im Angebot ist. Tipp auf ein Produkt, um die Angebote zu sehen.</p>
+      <form class="addrow" id="favForm"><input id="favInput" list="favSuggest" placeholder="Produkt oder Marke, z. B. Kaffee, Milka, Coca-Cola" autocomplete="off"><datalist id="favSuggest"></datalist><button class="btn primary" type="submit">Merken</button></form>
+      <div class="favchips" id="favChips"></div>
+      <div class="list" id="favHits"></div>
+    </section>
+
+    <!-- EINKAUFSLISTE -->
+    <section class="view" id="v-list" hidden>
+      <h2>Einkaufszettel</h2>
+      <form class="addrow" id="listForm"><input id="listInput" placeholder="Eigener Eintrag, z. B. Brötchen" autocomplete="off"><button class="btn primary" type="submit">Dazu</button></form>
+      <div id="receipt"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+        <button class="btn" id="clearDone" type="button">Erledigte löschen</button>
+        <button class="btn" id="clearAll" type="button">Zettel leeren</button>
+      </div>
+      <p class="note" id="clearConfirm" hidden><b>Wirklich alles löschen?</b> <button class="btn" id="clearYes" type="button">Ja, leeren</button> <button class="btn" id="clearNo" type="button">Abbrechen</button></p>
+    </section>
+  </div>
+</main>
+
+<nav class="tabs" aria-label="Bereiche">
+  <div class="wrap">
+    <button type="button" data-tab="offers" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18l-2 11H5z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg>Angebote</button>
+    <button type="button" data-tab="favs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>Favoriten<span class="badge" id="favBadge" hidden></span></button>
+    <button type="button" data-tab="list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Zettel<span class="badge" id="listBadge" hidden></span></button>
+  </div>
+</nav>
+
+<div class="sheet" id="setup" hidden>
+  <div class="panel">
+    <h2>Wo wohnst du?</h2>
+    <p class="lead" style="margin:0">Wähle deinen Stadtteil und die Märkte, in die du gehst. Das kannst du jederzeit oben über den Stadtteil ändern.</p>
+    <div class="label">Stadtteil</div>
+    <div class="grid2" id="stGrid"></div>
+    <div class="label">Meine Märkte</div>
+    <div class="grid2" id="mkGrid"></div>
+    <button class="btn primary" id="setupDone" type="button" style="justify-content:center;padding:12px">Fertig</button>
+  </div>
+</div>
+<div class="sheet" id="detail" hidden><div class="panel" id="detailPanel"></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const STADTTEILE=["Alkenrath","Bergisch Neukirchen","Bürrig","Hitdorf","Küppersteg","Lützenkirchen","Manfort","Opladen","Quettingen","Rheindorf","Schlebusch","Steinbüchel","Wiesdorf"];
+const MARKETS=[
+ {id:"aldi",n:"ALDI SÜD",t:"Discounter"},{id:"lidl",n:"Lidl",t:"Discounter"},{id:"netto",n:"Netto",t:"Discounter"},{id:"penny",n:"Penny",t:"Discounter"},
+ {id:"rewe",n:"REWE",t:"Supermarkt"},{id:"edeka",n:"EDEKA",t:"Supermarkt"},{id:"kaufland",n:"Kaufland",t:"Supermarkt"},
+ {id:"trinkgut",n:"Trinkgut",t:"Getränkemarkt"},{id:"hoffmann",n:"Getränke Hoffmann",t:"Getränkemarkt"},
+ {id:"dm",n:"dm",t:"Drogerie"},{id:"rossmann",n:"Rossmann",t:"Drogerie"},
+ {id:"philipps",n:"Thomas Philipps",t:"Sonderposten"}];
+const MK=Object.fromEntries(MARKETS.map(m=>[m.id,m]));
+/* Filialen in Leverkusen (Quellen: marktguru, rewe.de, supermarktcheck; Stand 20.10.2026) */
+const STORES=[
+ {m:"aldi",a:"Overfeldweg 7",z:"51371",st:"Bürrig"},{m:"aldi",a:"Schlebuscher Straße 84",z:"51381",st:"Fixheide"},{m:"aldi",a:"Peschstraße 11",z:"51373"},
+ {m:"aldi",a:"Bonner Straße 2C",z:"51379",st:"Opladen"},{m:"aldi",a:"Syltstraße 10-12",z:"51377"},{m:"aldi",a:"Ernst-Bloch-Straße",st:"Steinbüchel"},
+ {m:"aldi",a:"Hitdorfer Straße",st:"Hitdorf"},{m:"aldi",a:"Lützenkirchener Straße",st:"Quettingen"},{m:"aldi",a:"Wuppertalstraße"},{m:"aldi",a:"Am Klösterchen"},
+ {m:"rewe",a:"Gerhart-Hauptmann-Straße 72",z:"51379",st:"Opladen"},{m:"rewe",a:"Düsseldorfer Straße 41-45",z:"51379",st:"Opladen"},{m:"rewe",a:"Nobelstraße 3",z:"51373",st:"Wiesdorf"},
+ {m:"rewe",a:"Friedrich-Ebert-Platz 2",z:"51373",st:"Wiesdorf"},{m:"rewe",a:"Schlebuscher Straße 78",z:"51381",st:"Fixheide"},{m:"rewe",a:"Overfeldweg 3-5",z:"51371",st:"Bürrig"},
+ {m:"kaufland",a:"Stixchesstraße 123",z:"51377",st:"Manfort"},
+ {m:"edeka",n:"EDEKA Schallenberg",a:"Wupperstraße 8",z:"51371",st:"Rheindorf"},{m:"edeka",n:"EDEKA Opladen",a:"Pommernstraße 4-6",z:"51379",st:"Opladen"},
+ {m:"edeka",n:"EDEKA Fischer & Nieder",a:"Münsters Gässchen 3",z:"51375",st:"Schlebusch"},{m:"edeka",n:"EDEKA Schallenberg",a:"Hitdorfer Straße 197",z:"51371",st:"Hitdorf"},
+ {m:"edeka",n:"EDEKA Steinbüchel",a:"Theodor-Adorno-Straße 1",z:"51377",st:"Steinbüchel"},{m:"edeka",n:"EDEKA Kern",a:"Berliner Straße"},
+ {m:"netto",a:"Küppersteger Straße 40",z:"51373",st:"Küppersteg"},{m:"netto",a:"Kölner Straße 122",z:"51379",st:"Opladen"},{m:"netto",a:"Felderstraße 120",z:"51371",st:"Rheindorf"},
+ {m:"netto",a:"Quettinger Straße 220",z:"51381",st:"Quettingen"},{m:"netto",a:"Alkenrather Straße 20",z:"51377",st:"Alkenrath"},
+ {m:"penny",a:"Königsberger Platz",st:"Rheindorf"},
+ {m:"lidl",a:"Hardenbergstraße 80",z:"51373",st:"Küppersteg"},{m:"lidl",a:"Elbestraße 4",z:"51371",st:"Rheindorf"},{m:"lidl",a:"Stixchesstraße 133",z:"51377",st:"Manfort"},
+ {m:"lidl",a:"Carl-von-Ossietzky-Straße 1",z:"51377",st:"Steinbüchel"},
+ {m:"trinkgut",a:"Adolf-Kaschny-Straße 1-5",z:"51373"},
+ {m:"philipps",a:"Bürgerbuschweg 9",z:"51381"}
+];
+const mapsUrl=t=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t);
+const CATS=["Obst & Gemüse","Kühlregal","Fleisch & Fisch","Brot & Backwaren","Vorrat","Tiefkühl","Süßes & Snacks","Getränke","Drogerie & Haushalt"];
+
+let OFFERS=[], META={};
+let S={stadtteil:"",markets:MARKETS.map(m=>m.id),seen:MARKETS.map(m=>m.id),favs:[],list:[]};
+function addNewMarkets(){const seen=S.seen||S.markets.slice();MARKETS.forEach(m=>{if(!seen.includes(m.id)){S.markets.push(m.id);seen.push(m.id)}});S.seen=seen}
+let ui={tab:"offers",cat:"",mkt:"",q:"",sort:"disc"};
+let db=null, uid=null, saveT=null;
+
+const $=s=>document.querySelector(s);
+const eur=v=>v.toLocaleString("de-DE",{style:"currency",currency:"EUR"});
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm=s=>String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/ß/g,"ss");
+const fdate=iso=>{if(!iso)return"";const[y,m,d]=iso.split("-");return d+"."+m+"."};
+
+function unitPrice(o){
+  if(!o.q||!o.u)return null;
+  if(o.u==="g")return{v:o.p/o.q*1000,l:"/kg"};
+  if(o.u==="ml")return{v:o.p/o.q*1000,l:"/l"};
+  if(o.u==="kg")return{v:o.p/o.q,l:"/kg"};
+  if(o.u==="l")return{v:o.p/o.q,l:"/l"};
+  if(o.u==="stk"&&o.q>1)return{v:o.p/o.q,l:"/Stk."};
+  return null;
+}
+function qtyText(o){
+  if(!o.q||!o.u)return o.pack||"";
+  const u={g:"g",ml:"ml",kg:"kg",l:"l",stk:"Stk."}[o.u];
+  const q=String(o.q).replace(".",",");
+  return (o.pack?o.pack+" · ":"")+q+" "+u;
+}
+const disc=o=>o.op&&o.op>o.p?Math.round((1-o.p/o.op)*100):0;
+/* ---------- Suche: Wortstämme + Synonyme ---------- */
+const SYN={
+ cola:["cola","pepsi","coca","coke","mezzo"],limo:["limo","limonade","fanta","sprite","spezi","schorle"],spezi:["spezi","mezzo"],
+ wasser:["wasser","volvic","sprudel","mineral"],saft:["saft","hohes c","valensina","nektar"],energy:["energy","red bull","monster","effect"],
+ bier:["bier","pils","kolsch","helles","radler","weizenbier","hefeweizen","export","stubbi"],kaffe:["kaffee","melitta","jacobs","tchibo","dallmayr","espresso","crema","auslese"],
+ joghurt:["joghurt","jogurt","almighurt","grosse bauer","skyr","quark"],milch:["milch","vollmilch","barista","haferdrink"],
+ kase:["kase","gouda","mozzarella","frischkase","kase-balle"],butt:["markenbutter","kerrygold","kaergarden"," butter "],marg:["margarine","latta","rama","sanella"],
+ ei:["eier","ei "],nudel:["nudel","pasta","barilla","spaghetti","tortelloni","penne","fusilli"],pasta:["pasta","nudel","barilla","tortelloni"],
+ reis:["reis","basmati","jasmin"],toast:["toast","sandwich","golden toast"],brot:["brot","toast","panini","brotchen","baguette"],
+ pizza:["pizza","ristorante","wagner"],eis:["eis","ben & jerry","magnum","langnese"],
+ schoko:["schoko","milka","ritter","toffifee","choceur","schokolade","knoppers","dominostein"],gummi:["haribo","goldbar","fruchtgummi","pico-balla"],
+ chip:["chips","pringles","doritos","kruspers","pommels","funny"],snack:["chips","pringles","doritos","pommels","kase-balle","knoppers"],
+ hack:["hackfleisch"],hahnch:["hahnchen","huhn","geflugel","chicken","gyros"],fleisch:["fleisch","hackfleisch","gulasch","braten","schnitzel","hahnchen","bratwurst"],
+ wurst:["wurst","bratwurst","salami","schinken","spicker","mortadella"],fisch:["fisch","lachs","thunfisch","hering","forelle"],
+ apfel:["tafelapfel"," apfel"],banan:["banane"],tomat:["tomate"],kartoffel:["kartoffel","susskartoffel"],obst:["obst","apfel","birne","banane","mango","trauben","mandarine","kaki","beere","zitrone","granatapfel","avocado"],
+ gemus:["gemuse","kurbis","porree","rosenkohl","champignon","zucchini","spinat","tomate","kartoffel"],
+ klopapi:["toilettenpapier","klopapier"],toilettenpapi:["toilettenpapier","klopapier"],spulmittel:["spulmittel","fairy","pril"],spultab:["spulmaschinentabs","finish","tabs"],
+ waschmittel:["waschmittel","frosch","persil","ariel"],weichspul:["weichspuler","lenor"],wc:["wc","toilette"],sahne:["sahne","schlagsahne"],zucker:["zucker","puderzucker"]
+};
+const stem=w=>{w=norm(w).trim();for(const e of ["innen","chen","en","er","n","e","s"])if(w.length>e.length+3&&w.endsWith(e))return w.slice(0,-e.length);return w};
+const clean=t=>norm(t).replace(/[^a-z0-9]+/g," ").trim();
+const hay=o=>" "+clean(o.n+" "+(o.b||"")+" "+(o.br||"")+" "+(o.pack||""))+" ";
+const compact=t=>(" "+clean(t)+" ").replace(/ und /g," ").replace(/ /g,"");
+const EXCL=new Set(["butt","hack","apfel"]);
+function termsFor(word){
+  const st=stem(word), out=new Set();let excl=false;
+  for(const [k,arr] of Object.entries(SYN)) if(st.startsWith(k)||k.startsWith(st)&&st.length>=4){arr.forEach(a=>out.add(norm(a)));if(EXCL.has(k))excl=true}
+  if(!excl){out.add(st);out.add(norm(word))}
+  return [...out].filter(t=>t.length>=2);
+}
+function matches(o,query){
+  const h=hay(o), q=compact(query), multi=/[^a-z0-9]/.test(norm(query).trim());
+  if(multi&&q.length>=3&&compact(h).includes(q))return true; /* Marken: Coca-Cola, Dr. Oetker, Ben & Jerry's */
+  const words=clean(query).split(" ").filter(w=>w.length>=2);
+  if(!words.length)return false;
+  return words.every(w=>termsFor(w).some(t=>h.includes(t)));
+}
+const isFav=o=>S.favs.some(f=>matches(o,f));
+const inList=o=>S.list.some(i=>i.oid===o.id);
+
+/* ---------- Speichern ---------- */
+function loadLocal(){try{const r=localStorage.getItem("gk04");if(r)Object.assign(S,JSON.parse(r))}catch(e){}}
+function thaw(){S.favs=[...(S.favs||[])];S.list=(S.list||[]).map(i=>({...i}));S.markets=[...(S.markets||[])];if(S.seen)S.seen=[...S.seen]}
+function save(){
+  try{localStorage.setItem("gk04",JSON.stringify(S))}catch(e){}
+  if(!db||!uid)return;
+  clearTimeout(saveT);
+  saveT=setTimeout(async()=>{try{await db.doc("data/users/"+uid+"/state").set(JSON.parse(JSON.stringify(S)))}catch(e){}},600);
+}
+
+/* ---------- Rendern ---------- */
+function offerCard(o){
+  const up=unitPrice(o), d=disc(o), fav=isFav(o), il=inList(o);
+  const valid=o.to?("bis "+fdate(o.to)):"";
+  const from=o.from&&META.from&&o.from>META.from?("ab "+fdate(o.from)+" · "):"";
+  return `<article class="offer${fav?" fav":""}" data-detail="${esc(o.id)}" tabindex="0" role="button" aria-label="${esc(o.n)}: Läden anzeigen">
+    <div class="o-meta"><span class="mk">${esc(MK[o.m]?.n||o.m)}</span><span>${esc(o.c)}</span>${fav?'<span class="favtag">★ Favorit</span>':""}</div>
+    <div class="o-name">${esc(o.n)}</div>${o.br?`<div class="o-brand">Marke: ${esc(o.br)}</div>`:""}
+    <div class="o-sub">${esc(qtyText(o))}${up?" · "+eur(up.v)+up.l:""}${o.note?" · "+esc(o.note):""}<br>${from}${valid} · <span class="morelink">Läden anzeigen ›</span></div>
+    <div class="o-price">${d?`<span class="disc">−${d} %</span>`:""}<span class="price">${eur(o.p)}</span>${o.op?`<span class="old">${eur(o.op)}</span>`:""}</div>
+    <div class="o-actions">
+      <button type="button" class="btn${il?" on":""}" data-list="${esc(o.id)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">${il?'<path d="m5 12 5 5 9-10"/>':'<path d="M12 5v14M5 12h14"/>'}</svg>${il?"Auf dem Zettel":"Auf den Zettel"}</button>
+      <button type="button" class="btn${fav?" on":""}" data-fav="${esc(o.id)}" aria-label="Als Favorit merken"><svg viewBox="0 0 24 24" fill="${fav?"currentColor":"none"}" stroke="currentColor" stroke-width="2"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>${fav?"Favorit":"Merken"}</button>
+    </div></article>`;
+}
+function visibleOffers(){
+  return OFFERS.filter(o=>S.markets.includes(o.m));
+}
+function renderOffers(){
+  const base=visibleOffers();
+  const qn=norm(ui.q.trim());
+  let list=base.filter(o=>(!ui.cat||o.c===ui.cat)&&(!ui.mkt||o.m===ui.mkt)&&(!qn||(hay(o)+norm(o.c)).includes(qn)||matches(o,ui.q)));
+  const sorters={disc:(a,b)=>disc(b)-disc(a)||a.p-b.p,price:(a,b)=>a.p-b.p,unit:(a,b)=>(unitPrice(a)?.v??1e9)-(unitPrice(b)?.v??1e9),market:(a,b)=>(MK[a.m]?.n||"").localeCompare(MK[b.m]?.n||"")||a.p-b.p};
+  list.sort((a,b)=>(isFav(b)-isFav(a))||sorters[ui.sort](a,b));
+  // Kategorien
+  const cc={};base.forEach(o=>{if(!ui.mkt||o.m===ui.mkt)cc[o.c]=(cc[o.c]||0)+1});
+  $("#cats").innerHTML=`<button type="button" class="pill" data-cat="" aria-pressed="${!ui.cat}">Alles</button>`+CATS.filter(c=>cc[c]).map(c=>`<button type="button" class="pill" data-cat="${esc(c)}" aria-pressed="${ui.cat===c}">${esc(c)}<small>${cc[c]}</small></button>`).join("");
+  const mc={};base.forEach(o=>mc[o.m]=(mc[o.m]||0)+1);
+  $("#mkts").innerHTML=`<button type="button" class="pill" data-mkt="" aria-pressed="${!ui.mkt}">Alle Märkte</button>`+MARKETS.filter(m=>mc[m.id]).map(m=>`<button type="button" class="pill" data-mkt="${m.id}" aria-pressed="${ui.mkt===m.id}">${esc(m.n)}<small>${mc[m.id]}</small></button>`).join("");
+  $("#count").textContent=list.length+(list.length===1?" Angebot":" Angebote");
+  if(!OFFERS.length){
+    $("#offerList").innerHTML=`<div class="empty"><b>Angebote werden geladen …</b>Die Prospekt-Angebote kommen jeden Montag neu. Falls hier nichts erscheint, ist noch keine Woche eingetragen.</div>`;
+  }else if(!list.length){
+    $("#offerList").innerHTML=`<div class="empty"><b>Nichts gefunden</b>Probier einen anderen Suchbegriff oder wähle „Alles“.</div>`;
+  }else $("#offerList").innerHTML=list.map(offerCard).join("");
+  const miss=S.markets.filter(id=>!mc[id]).map(id=>MK[id]?.n).filter(Boolean);
+  $("#missing").innerHTML=miss.length&&OFFERS.length?`<b>Ohne Daten diese Woche:</b> ${esc(miss.join(", "))}. Für diese Märkte habe ich keine verlässlichen Prospektpreise gefunden.`:"";
+  $("#weekRange").textContent=META.from?fdate(META.from)+" – "+fdate(META.to)+(META.to?META.to.slice(0,4):""):"–";
+  $("#weekUpd").textContent=META.updated?"aktualisiert "+fdate(META.updated):"";
+}
+function renderFavs(){
+  const base=visibleOffers();
+  const sug=[...new Set(OFFERS.map(o=>(o.br||"").replace(/ \(.*\)$/,"")).filter(Boolean).concat(OFFERS.map(o=>o.b).filter(Boolean)))].sort((a,b)=>a.localeCompare(b,"de"));
+  $("#favSuggest").innerHTML=sug.map(x=>`<option value="${esc(x)}"></option>`).join("");
+  $("#favChips").innerHTML="";
+  if(!S.favs.length){
+    $("#favHits").innerHTML=`<div class="empty"><b>Noch keine Favoriten</b>Tipp oben ein Produkt ein oder drück bei einem Angebot auf „Merken“.</div>`;
+    $("#favBadge").hidden=true;return;
+  }
+  const rows=S.favs.map((f,i)=>{
+    const hits=base.filter(o=>matches(o,f)).sort((a,b)=>a.p-b.p);
+    const other=OFFERS.filter(o=>!S.markets.includes(o.m)&&matches(o,f));
+    return{f,i,hits,other};
+  }).sort((a,b)=>(b.hits.length>0)-(a.hits.length>0)||a.f.localeCompare(b.f,"de"));
+  const onSale=rows.filter(r=>r.hits.length).length;
+  $("#favHits").innerHTML=`<div class="favsum"><span><b>${onSale}</b> von ${rows.length} gerade im Angebot</span><span>${META.from?"Woche "+fdate(META.from)+" – "+fdate(META.to):""}</span></div>`+
+   `<div class="favtable">`+rows.map(({f,i,hits,other})=>{
+    const open=ui.openFav===f;
+    const mk=[...new Set(hits.map(o=>MK[o.m]?.n||o.m))];
+    const status=hits.length
+      ?`<span class="st yes">Im Angebot</span><span class="where">${esc(mk.join(", "))} · ab <b>${eur(hits[0].p)}</b></span>`
+      :`<span class="st no">Nicht im Angebot</span><span class="where">${other.length?"nur bei "+esc([...new Set(other.map(o=>MK[o.m]?.n))].join(", "))+" (nicht in deinen Märkten)":"diese Woche in keinem deiner Märkte"}</span>`;
+    return `<div class="frow${hits.length?" hit":""}">
+      <button type="button" class="fmain" data-openfav="${esc(f)}" ${hits.length?`aria-expanded="${open}"`:"disabled"}>
+        <span class="fname">${esc(f)}</span>${status}
+        ${hits.length?`<span class="chev" aria-hidden="true">${open?"▴":"▾"} ${hits.length}</span>`:""}
+      </button>
+      <button type="button" class="fdel" data-unfav="${i}" aria-label="${esc(f)} entfernen">×</button>
+      ${open?`<div class="fhits list">${hits.map(offerCard).join("")}</div>`:""}
+    </div>`}).join("")+`</div>`;
+  $("#favBadge").hidden=!onSale;$("#favBadge").textContent=onSale;
+}
+function renderList(){
+  const open=S.list.filter(i=>!i.done).length;
+  $("#listBadge").hidden=!open;$("#listBadge").textContent=open;
+  if(!S.list.length){$("#receipt").innerHTML=`<div class="empty"><b>Der Zettel ist leer</b>Drück bei einem Angebot auf „Auf den Zettel“ oder trag oben selbst etwas ein.</div>`;return}
+  const groups={};S.list.forEach((it,i)=>{const g=it.m?(MK[it.m]?.n||it.m):"Sonstiges";(groups[g]=groups[g]||[]).push([it,i])});
+  const total=S.list.filter(i=>!i.done&&i.p).reduce((s,i)=>s+i.p,0);
+  $("#receipt").innerHTML=`<div class="receipt"><div class="rhead">Geizkragen 04</div><div class="rsub">${esc(S.stadtteil||"Leverkusen")} · ${open} offen</div>`+
+   Object.entries(groups).map(([g,items])=>`<div class="rgroup"><h3>${esc(g)}</h3>`+items.map(([it,i])=>`<label class="ritem${it.done?" done":""}"><input type="checkbox" data-done="${i}" ${it.done?"checked":""}><span class="nm">${esc(it.n)}</span><span class="pr">${it.p?eur(it.p):""}</span><button type="button" class="x" data-del="${i}" aria-label="Entfernen">×</button></label>`).join("")+`</div>`).join("")+
+   `<div class="rtotal"><span>Summe offen</span><span>${eur(total)}</span></div></div>`;
+}
+function render(){renderOffers();renderFavs();renderList();$("#stName").textContent=S.stadtteil||"Stadtteil wählen"}
+
+/* ---------- Setup ---------- */
+function renderSetup(){
+  $("#stGrid").innerHTML=STADTTEILE.map(s=>`<button type="button" class="opt" data-st="${esc(s)}" aria-pressed="${S.stadtteil===s}">${esc(s)}</button>`).join("");
+  $("#mkGrid").innerHTML=MARKETS.map(m=>`<button type="button" class="opt" data-mk="${m.id}" aria-pressed="${S.markets.includes(m.id)}">${esc(m.n)}<br><small style="font-weight:500;opacity:.75">${m.t}</small></button>`).join("");
+}
+function openSetup(){renderSetup();$("#setup").hidden=false}
+
+let toastT;function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,1600)}
+
+/* ---------- Ereignisse ---------- */
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;thaw();
+  if(b.dataset.tab!==undefined){ui.tab=b.dataset.tab;document.querySelectorAll("nav.tabs button").forEach(x=>x.toggleAttribute("aria-current",x===b));document.querySelectorAll("nav.tabs button[aria-current]").forEach(x=>x.setAttribute("aria-current","page"));["offers","favs","list"].forEach(t=>$("#v-"+t).hidden=t!==ui.tab);window.scrollTo(0,0);return}
+  if(b.dataset.cat!==undefined){ui.cat=b.dataset.cat;renderOffers();return}
+  if(b.dataset.mkt!==undefined){ui.mkt=b.dataset.mkt;ui.cat="";renderOffers();return}
+  if(b.dataset.list){const o=OFFERS.find(x=>x.id===b.dataset.list);if(!o)return;const ix=S.list.findIndex(i=>i.oid===o.id);
+    if(ix>=0){S.list.splice(ix,1);toast("Vom Zettel genommen")}else{S.list.push({oid:o.id,n:o.n+(qtyText(o)?" ("+qtyText(o)+")":""),p:o.p,m:o.m,done:false});toast("Auf den Zettel gesetzt")}
+    save();render();return}
+  if(b.dataset.fav){const o=OFFERS.find(x=>x.id===b.dataset.fav);if(!o)return;
+    const key=(o.br||"").replace(/ \(.*\)$/,"")||o.b||o.n;
+    if(isFav(o)){S.favs=S.favs.filter(f=>!matches(o,f));toast("Favorit entfernt")}else{S.favs=[...S.favs,key];toast("„"+key+"“ gemerkt")}
+    save();render();return}
+  if(b.dataset.openfav!==undefined){ui.openFav=ui.openFav===b.dataset.openfav?"":b.dataset.openfav;renderFavs();return}
+  if(b.dataset.unfav!==undefined){S.favs.splice(+b.dataset.unfav,1);save();render();return}
+  if(b.dataset.del!==undefined){S.list.splice(+b.dataset.del,1);save();renderList();renderOffers();return}
+  if(b.dataset.st){S.stadtteil=b.dataset.st;renderSetup();return}
+  if(b.dataset.mk){const id=b.dataset.mk;S.markets=S.markets.includes(id)?S.markets.filter(x=>x!==id):[...S.markets,id];renderSetup();return}
+  if(b.id==="setupDone"){if(!S.markets.length)S.markets=MARKETS.map(m=>m.id);$("#setup").hidden=true;ui.mkt="";save();render();return}
+  if(b.id==="stBtn"){openSetup();return}
+  if(b.id==="clearDone"){S.list=S.list.filter(i=>!i.done);save();render();return}
+  if(b.id==="clearAll"){$("#clearConfirm").hidden=false;return}
+  if(b.id==="clearNo"){$("#clearConfirm").hidden=true;return}
+  if(b.id==="clearYes"){S.list=[];$("#clearConfirm").hidden=true;save();render();return}
+});
+document.addEventListener("change",e=>{thaw();if(e.target.dataset.done!==undefined){const it=S.list[+e.target.dataset.done];if(it){it.done=e.target.checked;save();renderList()}}});
+$("#q").addEventListener("input",e=>{ui.q=e.target.value;renderOffers()});
+$("#sort").addEventListener("change",e=>{ui.sort=e.target.value;renderOffers()});
+$("#favForm").addEventListener("submit",e=>{e.preventDefault();thaw();const v=$("#favInput").value.trim();if(!v)return;if(!S.favs.some(f=>norm(f)===norm(v)))S.favs.push(v);$("#favInput").value="";save();render()});
+$("#listForm").addEventListener("submit",e=>{e.preventDefault();thaw();const v=$("#listInput").value.trim();if(!v)return;S.list.push({n:v,done:false});$("#listInput").value="";save();render()});
+
+
+/* ---------- Detail: wo im Angebot ---------- */
+function relatedOffers(o){
+  const key=o.br?{f:"br",v:o.br}:{f:"b",v:o.b};
+  const rel=OFFERS.filter(x=>x.id!==o.id&&key.v&&x[key.f]===key.v&&(o.br||x.c===o.c));
+  return [o,...rel];
+}
+function storeRows(m){
+  const list=STORES.filter(x=>x.m===m).sort((a,b)=>((b.st&&b.st===S.stadtteil)-(a.st&&a.st===S.stadtteil))||(a.st||"zz").localeCompare(b.st||"zz","de"));
+  if(!list.length)return `<div class="store"><span class="sa">Keine Filiale in Leverkusen hinterlegt</span></div>`;
+  return list.map(x=>{const addr=x.a+", "+(x.z?x.z+" ":"")+"Leverkusen";const near=x.st&&x.st===S.stadtteil;
+    return `<div class="store"><span class="sa">${x.n?esc(x.n)+" · ":""}${esc(x.a)}</span>
+      <span class="sz">${esc((x.z?x.z+" ":"")+"Leverkusen")}${x.st?" · "+esc(x.st):""}${near?' · <span class="near">in deinem Stadtteil</span>':""}</span>
+      <a href="${mapsUrl(MK[m].n+" "+addr)}" target="_blank" rel="noopener">Karte ›</a></div>`}).join("");
+}
+function openDetail(id){
+  const o=OFFERS.find(x=>x.id===id);if(!o)return;
+  const rel=relatedOffers(o);
+  const byM={};rel.forEach(x=>{(byM[x.m]=byM[x.m]||[]).push(x)});
+  const chains=Object.entries(byM).sort((a,b)=>(b[0]===o.m)-(a[0]===o.m)||Math.min(...a[1].map(x=>x.p))-Math.min(...b[1].map(x=>x.p)));
+  $("#detailPanel").innerHTML=`<div class="dhead"><div><div class="label">${esc(o.br?"Marke: "+o.br.replace(/ \(.*\)$/,""):o.c)}</div><h2>${esc(o.n)}</h2></div><button type="button" class="dclose" data-close="1" aria-label="Schließen">×</button></div>
+   <p class="lead" style="margin:0">${chains.length>1?"Diese Woche in "+chains.length+" Märkten im Angebot":"Diese Woche im Angebot bei "+esc(MK[o.m]?.n)}. ${S.stadtteil?"Filialen in "+esc(S.stadtteil)+" stehen oben.":""}</p>`+
+   chains.map(([m,offs])=>{const best=offs.slice().sort((a,b)=>a.p-b.p);
+     return `<div class="chain${m===o.m?" cur":""}"><div class="chain-h"><div><b>${esc(MK[m]?.n||m)}</b><small>${best.map(x=>esc(x.n)+(x.pack||x.q?" ("+esc(qtyText(x))+")":"")+" bis "+fdate(x.to)).join("<br>")}</small></div><span class="pp">${eur(best[0].p)}</span></div>${storeRows(m)}</div>`}).join("")+
+   `<p class="note">Bei REWE und EDEKA können Preise und Angebote je nach Markt leicht abweichen. Die Filialliste kann unvollständig sein.</p>`;
+  $("#detail").hidden=false;
+}
+document.addEventListener("click",e=>{
+  if(e.target.closest("[data-close]")||e.target.id==="detail"){$("#detail").hidden=true;return}
+  if(e.target.closest("button,a,input,label"))return;
+  const card=e.target.closest("[data-detail]");if(card)openDetail(card.dataset.detail);
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape")$("#detail").hidden=true;
+  if((e.key==="Enter"||e.key===" ")&&e.target.matches("[data-detail]")){e.preventDefault();openDetail(e.target.dataset.detail)}
+});
+/* ---------- Start ---------- */
+const DATA_URL="https://raw.githubusercontent.com/schnitzeljagd16-cmyk/geizkragen-04/main/data/week.json";
+function applyWeek(d){if(!d||!Array.isArray(d.offers))return false;OFFERS=d.offers;META={from:d.from,to:d.to,updated:d.updated};render();return true}
+async function loadWeek(){
+  // 1. zuletzt geladene Woche sofort zeigen
+  try{const c=localStorage.getItem("gk04-week");if(c)applyWeek(JSON.parse(c))}catch(e){}
+  // 2. aktuelle Woche aus GitHub holen, sonst mitgelieferte Datei
+  for(const url of [DATA_URL+"?t="+Date.now(),"data/week.json"]){
+    try{const r=await fetch(url,{cache:"no-store"});if(!r.ok)continue;const d=await r.json();
+      if(!META.updated||!d.updated||d.updated>=META.updated||url.startsWith("data/")&&!OFFERS.length){
+        if(applyWeek(d)){try{localStorage.setItem("gk04-week",JSON.stringify(d))}catch(e){}}}
+      if(url.startsWith("http"))return;
+    }catch(e){}
+  }
+  if(!OFFERS.length)$("#offerList").innerHTML=`<div class="empty"><b>Keine Verbindung</b>Die Angebote konnten nicht geladen werden. Prüfe deine Internetverbindung und öffne die App erneut.</div>`;
+}
+loadLocal();addNewMarkets();render();
+if(!S.stadtteil)openSetup();
+loadWeek();
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)loadWeek()});
+</script>
+
+</body>
+</html>
