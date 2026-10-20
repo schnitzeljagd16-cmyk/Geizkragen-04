@@ -32,7 +32,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ink);color:#fff}
 header.top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px}
-.logo{width:42px;height:42px;flex:none}
+.logo{width:44px;height:44px;flex:none;border-radius:50%;background:#f8f6ea;object-fit:cover}
 .brand{flex:1;min-width:0}
 .brand h1{font-family:var(--display);font-weight:800;font-size:22px;line-height:1;margin:0;letter-spacing:-.01em}
 .brand h1 span{color:#ff3b44}
@@ -173,16 +173,7 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
 
 <header class="top">
   <div class="wrap">
-    <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
-      <defs><clipPath id="pig"><path d="M10 34c0-12 10-20 24-20 9 0 16 3 20 9l5-2-1 7c2 2 3 5 3 8v4l-4 1c-2 5-6 8-11 10v6h-7v-4h-10v4h-7v-7c-6-3-10-9-10-16z"/></clipPath></defs>
-      <g clip-path="url(#pig)">
-        <rect width="64" height="64" fill="#d6111b"/>
-        <rect x="18" width="7" height="64" fill="#111"/><rect x="32" width="7" height="64" fill="#111"/><rect x="46" width="7" height="64" fill="#111"/>
-      </g>
-      <rect x="28" y="16" width="12" height="3" rx="1.5" fill="#fff"/>
-      <circle cx="49" cy="29" r="2" fill="#fff"/>
-      <text x="32" y="45" text-anchor="middle" font-family="Arial Black,Arial" font-weight="900" font-size="13" fill="#fff">04</text>
-    </svg>
+    <img class="logo" src="logo.png" alt="" width="42" height="42">
     <div class="brand">
       <h1>Geizkragen <span>04</span></h1>
       <p>Angebote in Leverkusen</p>
