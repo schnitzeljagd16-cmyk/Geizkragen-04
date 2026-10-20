@@ -137,6 +137,19 @@ h2{font-family:var(--display);font-weight:800;font-size:22px;margin:0;text-wrap:
 .store .near{color:var(--accent);font-weight:700}
 .store a{grid-column:2;grid-row:1 / span 2;color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
 .store a:focus-visible{outline:2px solid var(--accent)}
+.sugg{display:flex;flex-wrap:wrap;gap:8px}
+.sg{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 12px;font-size:14px;font-weight:600}
+.sg.own{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.sg.sale,.bchip.sale{border-color:var(--accent)}
+.sg.sale::after,.bchip.sale::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:6px;vertical-align:middle}
+.brandcat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 12px}
+.brandcat summary{cursor:pointer;font-weight:700;padding:10px 0;list-style-position:inside}
+.brandcat[open]{padding-bottom:12px}
+.bfilter{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit;color:var(--fg);margin-bottom:10px}
+.bgroup{margin-top:10px}
+.bchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.bchip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 11px;font-size:13.5px;font-weight:600}
+.bchip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
 nav.tabs .wrap{display:grid;grid-template-columns:repeat(3,1fr);padding-block:6px}
 nav.tabs button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:600;color:var(--muted);padding:6px 0;position:relative}
@@ -197,8 +210,12 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
     <!-- FAVORITEN -->
     <section class="view" id="v-favs" hidden>
       <h2>Deine Favoriten</h2>
-      <p class="lead">Trag ein, was du regelmäßig kaufst. Hier steht bei jedem Produkt, ob und wo es diese Woche im Angebot ist. Tipp auf ein Produkt, um die Angebote zu sehen.</p>
-      <form class="addrow" id="favForm"><input id="favInput" list="favSuggest" placeholder="Produkt oder Marke, z. B. Kaffee, Milka, Coca-Cola" autocomplete="off"><datalist id="favSuggest"></datalist><button class="btn primary" type="submit">Merken</button></form>
+      <p class="lead">Tipp ein Produkt oder eine Marke ein und wähl einen Vorschlag, oder such dir Marken aus der Liste aus. Ein roter Punkt heißt: gerade im Angebot.</p>
+      <form class="addrow" id="favForm"><input id="favInput" placeholder="Produkt oder Marke, z. B. Kaffee, Coca-Cola" autocomplete="off" autocapitalize="sentences" enterkeyhint="done"><button class="btn primary" type="submit">Merken</button></form>
+      <div class="sugg" id="favSugg" hidden></div>
+      <details class="brandcat" id="brandCat"><summary>Alle Marken durchstöbern</summary>
+        <input id="brandFilter" class="bfilter" placeholder="Marken filtern …" autocomplete="off">
+        <div id="brandList"></div></details>
       <div class="favchips" id="favChips"></div>
       <div class="list" id="favHits"></div>
     </section>
@@ -268,6 +285,21 @@ const STORES=[
  {m:"philipps",a:"Bürgerbuschweg 9",z:"51381"}
 ];
 const mapsUrl=t=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t);
+/* Markenkatalog (unabhängig davon, ob gerade im Angebot) */
+const BRANDS={
+ "Getränke":["Coca-Cola","Coca-Cola Zero","Fanta","Sprite","Mezzo Mix","Pepsi","Schwip Schwap","Sinalco","Afri Cola","fritz-kola","Paulaner Spezi","Red Bull","Monster","Rockstar","Capri-Sun","Hohes C","Granini","Valensina","Punica","Lipton Ice Tea","Volvic","Gerolsteiner","Vittel","Evian","Apollinaris","Bad Vilbeler","Adelholzener","Albi","Oatly","Alpro"],
+ "Bier":["Bitburger","Krombacher","Warsteiner","Veltins","Beck's","Jever","Radeberger","Erdinger","Franziskaner","Paulaner","Holsten","Diebels","König Pilsener","Rothaus","Augustiner","Schöfferhofer","Clausthaler","Oettinger","Hasseröder","Licher","Früh Kölsch","Gaffel","Reissdorf","Sion","Mühlen Kölsch","Hövels"],
+ "Wein, Sekt & Spirituosen":["Rotkäppchen","Mumm","Henkell","Freixenet","Aperol","Lillet","Jägermeister","Bacardi","Havana Club","Captain Morgan","Smirnoff","Absolut","Jack Daniel's","Jim Beam","Asbach","Ramazzotti","Baileys","Berentzen","Kilbeggan"],
+ "Kaffee & Tee":["Jacobs","Tchibo","Dallmayr","Melitta","Lavazza","Segafredo","Nescafé","Senseo","Onko","Eduscho","Starbucks","Teekanne","Meßmer","Pompadour"],
+ "Süßes":["Milka","Ritter Sport","Lindt","Kinder","Ferrero","Nutella","Toffifee","Knoppers","Merci","Duplo","Hanuta","Raffaello","Haribo","Katjes","Trolli","Storck","Werther's","Nimm2","Twix","Snickers","Mars","Bounty","KitKat","M&M's","Leibniz","Bahlsen","Prinzen Rolle","Oreo","Pick Up","Balisto","Milchschnitte"],
+ "Snacks":["Chio","Funny-frisch","Lorenz","Pringles","Doritos","Lay's","Crunchips","Ültje","XOX","Wurzener"],
+ "Kühlregal":["Müller","Ehrmann","Danone","Activia","Actimel","Zott","Bauer","Weihenstephan","Landliebe","Bärenmarke","Philadelphia","Exquisa","Almette","Bresso","Leerdammer","Babybel","Kerrygold","Arla","Rama","Lätta","Becel","Rügenwalder Mühle","Herta","Wiesenhof","Gutfried","Meica","Böklunder","Tillman's"],
+ "Tiefkühl":["Dr. Oetker","Wagner","Iglo","Frosta","McCain","Ben & Jerry's","Langnese","Magnum","Mövenpick"],
+ "Vorrat & Brot":["Barilla","Knorr","Maggi","Miracoli","Mondamin","Ben's Original","Kühne","Heinz","Hellmann's","Thomy","Develey","Bonduelle","Erasco","Kellogg's","Kölln","Seitenbacher","Nestlé","Golden Toast","Harry","Lieken Urkorn","Mestemacher"],
+ "Drogerie & Haushalt":["Persil","Ariel","Weißer Riese","Lenor","Frosch","Fairy","Pril","Finish","Somat","Calgon","WC Ente","WC Frisch","Domestos","Meister Proper","Sagrotan","Tempo","Zewa","Hakle","Cottonelle","Nivea","Dove","Duschdas","Fa","Axe","Rexona","Gillette","Colgate","Elmex","Odol-med3","Oral-B","Schauma","Head & Shoulders","Garnier","Labello","Pampers","Balea","Isana"],
+ "Tier":["Whiskas","Felix","Sheba","Gourmet","Pedigree","Chappi","Frolic"]
+};
+const ALLBRANDS=[...new Set(Object.values(BRANDS).flat())];
 const CATS=["Obst & Gemüse","Kühlregal","Fleisch & Fisch","Brot & Backwaren","Vorrat","Tiefkühl","Süßes & Snacks","Getränke","Drogerie & Haushalt"];
 
 let OFFERS=[], META={};
@@ -390,8 +422,7 @@ function renderOffers(){
 }
 function renderFavs(){
   const base=visibleOffers();
-  const sug=[...new Set(OFFERS.map(o=>(o.br||"").replace(/ \(.*\)$/,"")).filter(Boolean).concat(OFFERS.map(o=>o.b).filter(Boolean)))].sort((a,b)=>a.localeCompare(b,"de"));
-  $("#favSuggest").innerHTML=sug.map(x=>`<option value="${esc(x)}"></option>`).join("");
+  renderBrandList();
   $("#favChips").innerHTML="";
   if(!S.favs.length){
     $("#favHits").innerHTML=`<div class="empty"><b>Noch keine Favoriten</b>Tipp oben ein Produkt ein oder drück bei einem Angebot auf „Merken“.</div>`;
@@ -469,7 +500,7 @@ document.addEventListener("click",e=>{
 document.addEventListener("change",e=>{thaw();if(e.target.dataset.done!==undefined){const it=S.list[+e.target.dataset.done];if(it){it.done=e.target.checked;save();renderList()}}});
 $("#q").addEventListener("input",e=>{ui.q=e.target.value;renderOffers()});
 $("#sort").addEventListener("change",e=>{ui.sort=e.target.value;renderOffers()});
-$("#favForm").addEventListener("submit",e=>{e.preventDefault();thaw();const v=$("#favInput").value.trim();if(!v)return;if(!S.favs.some(f=>norm(f)===norm(v)))S.favs.push(v);$("#favInput").value="";save();render()});
+$("#favForm").addEventListener("submit",e=>{e.preventDefault();const v=$("#favInput").value.trim();if(!v)return;addFav(v);$("#favInput").value="";renderSugg()});
 $("#listForm").addEventListener("submit",e=>{e.preventDefault();thaw();const v=$("#listInput").value.trim();if(!v)return;S.list.push({n:v,done:false});$("#listInput").value="";save();render()});
 
 
@@ -507,6 +538,46 @@ document.addEventListener("click",e=>{
 document.addEventListener("keydown",e=>{
   if(e.key==="Escape")$("#detail").hidden=true;
   if((e.key==="Enter"||e.key===" ")&&e.target.matches("[data-detail]")){e.preventDefault();openDetail(e.target.dataset.detail)}
+});
+
+/* ---------- Vorschläge & Markenkatalog ---------- */
+function suggPool(){
+  const fromOffers=OFFERS.map(o=>(o.br||"").replace(/ \(.*\)$/,"")).concat(OFFERS.map(o=>o.b)).filter(Boolean);
+  return [...new Set(ALLBRANDS.concat(fromOffers))];
+}
+const onSaleNow=t=>visibleOffers().some(o=>matches(o,t));
+const isFavName=t=>S.favs.some(f=>norm(f)===norm(t));
+function renderSugg(){
+  const q=$("#favInput").value.trim(), box=$("#favSugg");
+  if(!q){box.hidden=true;box.innerHTML="";return}
+  const nq=compact(q);
+  const pool=suggPool().filter(x=>!isFavName(x));
+  const starts=pool.filter(x=>compact(x).startsWith(nq)), cont=pool.filter(x=>!compact(x).startsWith(nq)&&compact(x).includes(nq));
+  const list=starts.concat(cont).sort((a,b)=>onSaleNow(b)-onSaleNow(a)).slice(0,14);
+  const own=isFavName(q)?"":`<button type="button" class="sg own" data-addfav="${esc(q)}">„${esc(q)}“ merken</button>`;
+  box.innerHTML=own+list.map(x=>`<button type="button" class="sg${onSaleNow(x)?" sale":""}" data-addfav="${esc(x)}">${esc(x)}</button>`).join("");
+  box.hidden=false;
+}
+function renderBrandList(){
+  if(!$("#brandCat").open)return;
+  const f=compact($("#brandFilter").value||"");
+  const fromOffers=[...new Set(OFFERS.map(o=>(o.br||"").replace(/ \(.*\)$/,"")).filter(b=>b&&!ALLBRANDS.some(x=>norm(x)===norm(b))))];
+  const groups=Object.entries(BRANDS).concat(fromOffers.length?[["Weitere aus den Prospekten",fromOffers]]:[]);
+  $("#brandList").innerHTML=groups.map(([g,arr])=>{
+    const items=arr.filter(b=>!f||compact(b).includes(f)).sort((a,b)=>a.localeCompare(b,"de"));
+    if(!items.length)return"";
+    return `<div class="bgroup"><div class="label">${esc(g)}</div><div class="bchips">${items.map(b=>{const fav=isFavName(b),sale=onSaleNow(b);
+      return `<button type="button" class="bchip${fav?" on":""}${sale?" sale":""}" data-togglefav="${esc(b)}" aria-pressed="${fav}">${fav?"★ ":""}${esc(b)}</button>`}).join("")}</div></div>`}).join("")||`<p class="note">Keine Marke gefunden. Du kannst sie oben trotzdem eintippen und merken.</p>`;
+}
+function addFav(v){v=v.trim();if(!v)return;thaw();if(!isFavName(v)){S.favs=[...S.favs,v];toast("„"+v+"“ gemerkt")}save();render()}
+$("#favInput").addEventListener("input",renderSugg);
+$("#brandFilter").addEventListener("input",renderBrandList);
+$("#brandCat").addEventListener("toggle",renderBrandList);
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-addfav]");if(a){addFav(a.dataset.addfav);$("#favInput").value="";renderSugg();$("#favInput").focus();return}
+  const t=e.target.closest("[data-togglefav]");if(t){const v=t.dataset.togglefav;thaw();
+    if(isFavName(v)){S.favs=S.favs.filter(f=>norm(f)!==norm(v));toast("Favorit entfernt")}else{S.favs=[...S.favs,v];toast("„"+v+"“ gemerkt")}
+    save();render()}
 });
 /* ---------- Start ---------- */
 const DATA_URL="https://raw.githubusercontent.com/schnitzeljagd16-cmyk/geizkragen-04/main/data/week.json";
