@@ -259,8 +259,8 @@ nav.tabs button[aria-current="page"]{color:var(--accent)}
 <script>
 const STADTTEILE=["Alkenrath","Bergisch Neukirchen","Bürrig","Hitdorf","Küppersteg","Lützenkirchen","Manfort","Opladen","Quettingen","Rheindorf","Schlebusch","Steinbüchel","Wiesdorf"];
 const MARKETS=[
- {id:"aldi",n:"ALDI SÜD",t:"Discounter"},{id:"lidl",n:"Lidl",t:"Discounter"},{id:"netto",n:"Netto",t:"Discounter"},{id:"penny",n:"Penny",t:"Discounter"},
- {id:"rewe",n:"REWE",t:"Supermarkt"},{id:"edeka",n:"EDEKA",t:"Supermarkt"},{id:"kaufland",n:"Kaufland",t:"Supermarkt"},
+ {id:"aldi",n:"ALDI SÜD",t:"Discounter"},{id:"lidl",n:"Lidl",t:"Discounter"},{id:"netto",n:"Netto",t:"Discounter"},{id:"penny",n:"Penny",t:"Discounter"},{id:"norma",n:"NORMA",t:"Discounter"},
+ {id:"rewe",n:"REWE",t:"Supermarkt"},{id:"edeka",n:"EDEKA",t:"Supermarkt"},{id:"kaufland",n:"Kaufland",t:"Supermarkt"},{id:"hit",n:"HIT",t:"Supermarkt"},
  {id:"trinkgut",n:"Trinkgut",t:"Getränkemarkt"},{id:"hoffmann",n:"Getränke Hoffmann",t:"Getränkemarkt"},
  {id:"dm",n:"dm",t:"Drogerie"},{id:"rossmann",n:"Rossmann",t:"Drogerie"},
  {id:"philipps",n:"Thomas Philipps",t:"Sonderposten"}];
@@ -282,7 +282,13 @@ const STORES=[
  {m:"lidl",a:"Hardenbergstraße 80",z:"51373",st:"Küppersteg"},{m:"lidl",a:"Elbestraße 4",z:"51371",st:"Rheindorf"},{m:"lidl",a:"Stixchesstraße 133",z:"51377",st:"Manfort"},
  {m:"lidl",a:"Carl-von-Ossietzky-Straße 1",z:"51377",st:"Steinbüchel"},
  {m:"trinkgut",a:"Adolf-Kaschny-Straße 1-5",z:"51373"},
- {m:"philipps",a:"Bürgerbuschweg 9",z:"51381"}
+ {m:"philipps",a:"Bürgerbuschweg 9",z:"51381"},
+ {m:"hit",n:"HIT Schlebusch",a:"Gezelinallee 17-19",z:"51375",st:"Schlebusch"},
+ {m:"norma",a:"Manforter Straße 247",z:"51373",st:"Manfort"},
+ {m:"hoffmann",a:"Elbestraße 15",z:"51371",st:"Rheindorf"},{m:"hoffmann",a:"Stixchesstraße 131",z:"51377",st:"Manfort"},
+ {m:"dm",a:"Syltstraße"},{m:"dm",a:"Elbestraße",st:"Rheindorf"},{m:"dm",a:"Kölner Straße",st:"Opladen"},{m:"dm",a:"Friedrich-Ebert-Platz",st:"Wiesdorf"},
+ {m:"rossmann",a:"Wiesdorfer Platz 4",z:"51373",st:"Wiesdorf"},{m:"rossmann",a:"Heinrich-von-Stephan-Straße 4",z:"51373",st:"Wiesdorf"},
+ {m:"rossmann",a:"Kölner Straße 56-58",z:"51379",st:"Opladen"},{m:"rossmann",a:"Pützdelle 2",z:"51371",st:"Rheindorf"},{m:"rossmann",a:"Stixchesstraße 127",z:"51377",st:"Manfort"}
 ];
 const mapsUrl=t=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t);
 /* Markenkatalog (unabhängig davon, ob gerade im Angebot) */
