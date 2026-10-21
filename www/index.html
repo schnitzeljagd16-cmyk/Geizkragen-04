@@ -270,8 +270,8 @@ const STORES=[
  {m:"aldi",a:"Overfeldweg 7",z:"51371",st:"Bürrig"},{m:"aldi",a:"Schlebuscher Straße 84",z:"51381",st:"Fixheide"},{m:"aldi",a:"Peschstraße 11",z:"51373"},
  {m:"aldi",a:"Bonner Straße 2C",z:"51379",st:"Opladen"},{m:"aldi",a:"Syltstraße 10-12",z:"51377"},{m:"aldi",a:"Ernst-Bloch-Straße",st:"Steinbüchel"},
  {m:"aldi",a:"Hitdorfer Straße",st:"Hitdorf"},{m:"aldi",a:"Lützenkirchener Straße",st:"Quettingen"},{m:"aldi",a:"Wuppertalstraße"},{m:"aldi",a:"Am Klösterchen"},
- {m:"rewe",a:"Gerhart-Hauptmann-Straße 72",z:"51379",st:"Opladen"},{m:"rewe",a:"Düsseldorfer Straße 41-45",z:"51379",st:"Opladen"},{m:"rewe",a:"Nobelstraße 3",z:"51373",st:"Wiesdorf"},
- {m:"rewe",a:"Friedrich-Ebert-Platz 2",z:"51373",st:"Wiesdorf"},{m:"rewe",a:"Schlebuscher Straße 78",z:"51381",st:"Fixheide"},{m:"rewe",a:"Overfeldweg 3-5",z:"51371",st:"Bürrig"},
+ {m:"rewe",n:"REWE Ihr Kaufpark",a:"Gerhart-Hauptmann-Straße 72",z:"51379",st:"Opladen"},{m:"rewe",a:"Düsseldorfer Straße 41-45",z:"51379",st:"Opladen"},{m:"rewe",a:"Nobelstraße 3",z:"51373",st:"Wiesdorf"},
+ {m:"rewe",a:"Friedrich-Ebert-Platz 2",z:"51373",st:"Wiesdorf"},{m:"rewe",n:"REWE Ihr Kaufpark",a:"Schlebuscher Straße 78",z:"51381",st:"Fixheide"},{m:"rewe",n:"REWE Ihr Kaufpark",a:"Overfeldweg 3-5",z:"51371",st:"Bürrig"},
  {m:"kaufland",a:"Stixchesstraße 123",z:"51377",st:"Manfort"},
  {m:"edeka",n:"EDEKA Schallenberg",a:"Wupperstraße 8",z:"51371",st:"Rheindorf"},{m:"edeka",n:"EDEKA Opladen",a:"Pommernstraße 4-6",z:"51379",st:"Opladen"},
  {m:"edeka",n:"EDEKA Fischer & Nieder",a:"Münsters Gässchen 3",z:"51375",st:"Schlebusch"},{m:"edeka",n:"EDEKA Schallenberg",a:"Hitdorfer Straße 197",z:"51371",st:"Hitdorf"},
@@ -355,7 +355,7 @@ const SYN={
  apfel:["tafelapfel"," apfel"],banan:["banane"],tomat:["tomate"],kartoffel:["kartoffel","susskartoffel"],obst:["obst","apfel","birne","banane","mango","trauben","mandarine","kaki","beere","zitrone","granatapfel","avocado"],
  gemus:["gemuse","kurbis","porree","rosenkohl","champignon","zucchini","spinat","tomate","kartoffel"],
  klopapi:["toilettenpapier","klopapier"],toilettenpapi:["toilettenpapier","klopapier"],spulmittel:["spulmittel","fairy","pril"],spultab:["spulmaschinentabs","finish","tabs"],
- waschmittel:["waschmittel","frosch","persil","ariel"],weichspul:["weichspuler","lenor"],wc:["wc","toilette"],sahne:["sahne","schlagsahne"],zucker:["zucker","puderzucker"]
+ waschmittel:["waschmittel","frosch","persil","ariel"],weichspul:["weichspuler","lenor"],wc:["wc","toilette"],sahne:["sahne","schlagsahne"],cereal:["cerealien","cornflakes","musli","cini minis","nesquik","lion","smacks","choco krispies"],musli:["musli","cerealien"],kaufpark:["rewe"],zucker:["zucker","puderzucker"]
 };
 const stem=w=>{w=norm(w).trim();for(const e of ["innen","chen","en","er","n","e","s"])if(w.length>e.length+3&&w.endsWith(e))return w.slice(0,-e.length);return w};
 const clean=t=>norm(t).replace(/[^a-z0-9]+/g," ").trim();
